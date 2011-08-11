@@ -12,7 +12,7 @@ Lingwah was developed with an emphasis on ease of use over performance and is
 built to parse context-free grammars without requiring the grammars to be refactored.
 
 Now, just because Lingwah purposely takes an approach that is known to not be 
-the most performant does not mean that Lingwah is slow, Lingwah is 'fast enough'.
+the most performant does not mean that Lingwah is slow.  Lingwah is 'fast enough'.
 Lingwah uses sophisticated memoization and backtracking techniques to accomplish 
 it's goals.  The techniques used by Linqwah have been around for decades but 
 have not been favored for performance reasons.  
