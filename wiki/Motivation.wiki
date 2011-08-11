@@ -16,9 +16,9 @@ the most performant does not mean that Lingwah is slow.  Lingwah is 'fast enough
 Lingwah uses sophisticated memoization and backtracking techniques to accomplish 
 it's goals.  The techniques used by Linqwah have been around for decades but 
 have not been favored for performance reasons.  
-Lingwah uses the memoization and 'continuation-passing' techniques first described 
+Lingwah uses the memoization and 'continuation-passing' techniques described 
 in the paper [http://arxiv.org/PS_cache/cmp-lg/pdf/9504/9504016v1.pdf "Memoization in Top-Down Parsing"] by Mark Johnson.
-However, computers are now many magnitudes of order faster than they were when 
+Computers are now many magnitudes of order faster than they were when 
 the LR parser was invented by Donald Knuth, and the amount of memory available has also increased 
 proportionately.  
 It's time to increase our productivity by trading some parsing speed for some 
