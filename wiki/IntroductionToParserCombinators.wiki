@@ -76,7 +76,7 @@ assert results.success();
 }}}
 
 =How the Magic Works=
-The really significant thing to notice here is that the SimpleScalaGrammar class does not actually do anything - it is merely a description of grammar using basic constructs.
+The really significant thing to notice here is that the SimpleScalaGrammar class does not actually do anything - it is merely a description of a grammar using basic constructs.
 In this case the develop is not required to implement anything, the developer merely describes something (the grammar to be parsed).
 Each parser defined by SimpleScalaGrammar class describes some element of the associated grammar.
 To parse some input a MatchContext (the context manages the parsing process) is created and a parser and some input is passed to it.
