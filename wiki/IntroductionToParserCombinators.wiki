@@ -4,11 +4,11 @@ Like many software developers, you have occasionally need to parse data or infor
 Perhaps you have written a parser yourself or used an off-the-shelf tool like [http://www.antlr.org/ ANTLR].
 In any case, it is likely that you found the process of creating a parser to be tedious, frustrating, and error-prone.  
 Parser combinators make it almost too easy to create a parser for a complex language without ever leaving the comfortable play-pen afforded by your Java IDE.  
-Incidentally, if you aren’t familiar with the fundamentals of text parsing, context-free grammars and/or parser generators, then you might want to [http://en.wikipedia.org/wiki/Context-free_grammar do] [http://en.wikipedia.org/wiki/LL_parsing some] [http://en.wikipedia.org/wiki/Recursive_descent reading] before you continue.
+Incidentally, if you aren't familiar with the fundamentals of text parsing, context-free grammars and/or parser generators, then you might want to [http://en.wikipedia.org/wiki/Context-free_grammar do] [http://en.wikipedia.org/wiki/LL_parsing some] [http://en.wikipedia.org/wiki/Recursive_descent reading] before you continue.
 
 =Intro to Parser Combinators=
 In most languages, the process of creating a text parser is usually an arduous and clumsy affair involving a parser generator (such as ANTLR, JavaCC, Beaver or ScalaBison) and (usually) a lexer generator such as JFlex.  
-These tools do a very good job of generating sources for efficient and powerful parsers, but they aren’t exactly the easiest tools to use.  
+These tools do a very good job of generating sources for efficient and powerful parsers, but they aren't exactly the easiest tools to use.  
 They generally have a very steep learning curve, and due to their unique status as compiler-compilers, an unintuitive architecture.  
 Additionally, these tools can be somewhat rigid, making it very difficult to implement unique or experimental features.  
 For this reason alone, many real world compilers and interpreters (such as javac, ruby, jruby and scalac) actually use hand-written parsers.  
@@ -17,11 +17,11 @@ These are usually easier to tweak, but they can be very difficult to develop and
 When creating a compiler in Java, it is perfectly acceptable to make use of these conventional Java-generating tools like ANTLR or Beaver, but we do have other options.  
 Parser combinators are a domain-specific language baked into a standard Java library.  
 Using this internal DSL, we can create an instance of a parser for a given grammar using Java.  
-What’s more, we can do this in a very declarative fashion.  
+What's more, we can do this in a very declarative fashion.  
 Thanks to the magic of DSLs, our sources will actually look like a plain-Jane context-free grammar for our language.  
 This means that we get most of the benefits of a hand-written parser without losing the maintainability afforded by parser generators like bison.  
 For example, here is a very simple grammar for a simplified [http://www.scala-lang.org/ Scala]-like language, expressed in Java using Lingwah:
-<code>
+{{{
 /**
  * A simple grammar similar to Scala
  */
@@ -63,17 +63,17 @@ public class SimpleScalaGrammar extends Grammar {
 	}
 }
 
-</code>
+}}}
 This is all valid and correct Java.  
 An instance of the SimpleScalaGrammar class can then be used to process a java.io.Reader, producing some result if the input is valid, otherwise producing an error.
 
 Here is code that shows how to use the SimpleScalaGrammar class: 
-<code>
+{{{
 Reader input= new FileReader("example.scala");
 Grammar grammar= new SimpleScalaGrammar();
 ParseResults results= new ParseContext().parse(grammar.program, input);
 assert results.success();
-</code>
+}}}
 
 =How the Magic Works=
 The really significant thing to notice here is that the SimpleScalaGrammar class does not actually do anything - it is merely a description of grammar using basic constructs.
@@ -83,7 +83,7 @@ To parse some input a MatchContext (the context manages the parsing process) is 
 In the above example we are parsing a complete document so we use the grammar.program parser.
 If we wanted to just parse an expression then we would use the grammar.expr parser.   
 
-All the magic happens in the Lingwah library, to understand it we’re going to need to take a few steps back.
+All the magic happens in the Lingwah library, to understand it we're going to need to take a few steps back.
 
 Conceptually, a Parser represents a very simple idea:
 
@@ -101,12 +101,12 @@ If it succeeds, it will return a ParseResults instance that enumerates all the m
 If it fails, it will return a ParseResults instance that indicates that the parse failed, and it will include an error message along the lines of “Expected 'bore'“, or something to that effect.
 
 By itself, such a parser is really not very useful.  
-After all, it’s easy enough to perform a little bit of String equality testing when looking for a well-defined token.  
+After all, it's easy enough to perform a little bit of String equality testing when looking for a well-defined token.  
 The real power of parser combinators is in what happens when you start combining them together (hence the name).  
 A few string parsers combined in sequence can give us a phrase in our grammar, and a few of these sequences combined in a disjunction can give us the full power of a non-terminal with multiple productions.  
 As it turns out, all we need is the string parser combined with the sequence, choice, repeat, and optional combinators to express any context free grammar.
 
-Before we get into the combinators themselves, let’s build a framework.  
+Before we get into the combinators themselves, let's build a framework.  
 We will define Parser[A] as a function from Stream[Character] to Result[A], where Result[A] has two implementations: Success[A] and Failure.  
 The framework looks like the following:
 
@@ -117,7 +117,7 @@ sealed trait Result[+A]
 case class Success[+A](value: A, rem: Stream[Character]) extends Result[A]
  
 case class Failure(msg: String) extends Result[Nothing]
-Additionally, we must add a concrete parser, keyword, to handle our literals.  For the sake of syntactic compatibility with Scala’s parser combinators, this parser will be defined within the RegexpParsers singleton object (despite the fact that we don’t really support regular expressions):
+Additionally, we must add a concrete parser, keyword, to handle our literals.  For the sake of syntactic compatibility with Scala's parser combinators, this parser will be defined within the RegexpParsers singleton object (despite the fact that we don't really support regular expressions):
 
 object RegexpParsers {
   implicit def keyword(str: String) = new Parser[String] {
@@ -138,7 +138,7 @@ object RegexpParsers {
     }
   }
 }
-For those of you who are still a little uncomfortable with the more obscure higher-order utility methods in the Scala collections framework: don’t worry about it.  While the above may be a bit obfuscated, there isn’t really a need to understand what’s going on at any sort of precise level.  The important point is that this Parser defines an apply method which compares str to an equally-lengthed prefix from s, the input character Stream.  At the end of the day, it returns either Success or Failure.
+For those of you who are still a little uncomfortable with the more obscure higher-order utility methods in the Scala collections framework: don't worry about it.  While the above may be a bit obfuscated, there isn't really a need to understand what's going on at any sort of precise level.  The important point is that this Parser defines an apply method which compares str to an equally-lengthed prefix from s, the input character Stream.  At the end of the day, it returns either Success or Failure.
 
 The Sequential Combinator
 The first of the two combinators we need to look at is the sequence combinator.  Conceptually, this combinator takes two parsers and produces a new parser which matches the first and the second in order.  If either one of the parsers produces a Failure, then the entire sequence will fail.  In terms of classical logic, this parser corresponds to the AND operation.  The code for this parser is almost ridiculously simple:
@@ -157,9 +157,9 @@ class SequenceParser[+A, +B](l: =>Parser[A],
     case f: Failure => f
   }
 }
-This is literally just a parser which applies its left operand and then applies its right to whatever is left.  As long as both parsers succeed, a composite Success will be produced containing a tuple of the left and right parser’s results.  Note that Scala’s parser combinator framework actually yields an instance of the ~ case class from its sequence combinator.  This is particularly convenient as it allows for a very nice syntax in pattern matching for semantic actions (extracting parse results).  However, since we will not be dealing with the action combinators in this article, it seemed simpler to just use a tuple.
+This is literally just a parser which applies its left operand and then applies its right to whatever is left.  As long as both parsers succeed, a composite Success will be produced containing a tuple of the left and right parser's results.  Note that Scala's parser combinator framework actually yields an instance of the ~ case class from its sequence combinator.  This is particularly convenient as it allows for a very nice syntax in pattern matching for semantic actions (extracting parse results).  However, since we will not be dealing with the action combinators in this article, it seemed simpler to just use a tuple.
 
-One item worthy of note is the fact that both left and right are evaluated lazily.  This means that we don’t actually evaluate our constructor parameters until the parser is applied to a specific stream.  This is very important as it allows us to define parsers with recursive rules.  Recursion is really what separates context-free grammars from regular expressions.  Without this laziness, any recursive rules would lead to an infinite loop in the parser construction.
+One item worthy of note is the fact that both left and right are evaluated lazily.  This means that we don't actually evaluate our constructor parameters until the parser is applied to a specific stream.  This is very important as it allows us to define parsers with recursive rules.  Recursion is really what separates context-free grammars from regular expressions.  Without this laziness, any recursive rules would lead to an infinite loop in the parser construction.
 
 Once we have the sequence combinator in hand, we can add a bit of syntax sugar to enable its use.  All instances of Parser will define a ~ operator which takes a single operand and produces a SequenceParser which handles the receiver and the parameter in order:
 
@@ -170,7 +170,7 @@ With this modification to Parser, we can now create parsers which match arbitrar
 
 def classPrefix = "class" ~ ID ~ "(" ~ formals ~ ")"
 The Disjunctive Combinator
-This is a very academic name for a very simple concept.  Let’s think about the framework so far.  We have both literal parsers and sequential combinations thereof.  Using this framework, we are capable of defining parsers which match arbitrary token strings.  We can even define parsers which match infinite token sequences, simply by involving recursion:
+This is a very academic name for a very simple concept.  Let's think about the framework so far.  We have both literal parsers and sequential combinations thereof.  Using this framework, we are capable of defining parsers which match arbitrary token strings.  We can even define parsers which match infinite token sequences, simply by involving recursion:
 
 def fearTheOnes: Parser[Any] = "1" ~ fearTheOnes
 Of course, this parser is absurd, since it only matches an infinite input consisting of the '1' character, but it does serve to illustrate that we have a reasonably powerful framework even in its current form.  This also provides a nice example of how the lazy evaluation of sequence parsers is an absolutely essential feature.  Without it, the fearTheOnes method would enter an infinite loop and would never return an instance of Parser.
@@ -203,7 +203,7 @@ trait Parser[+A] extends (Stream[Character]=>Result[A]) {
   def |(that: Parser[A]) = new DisParser(this, that)
 }
 …is that all?
-It’s almost as if by magic, but the addition of the disjunctive combinator to the sequential actually turns our framework into something really special, capable of chewing through any LL(*) grammar.  Just in case you don’t believe me, consider the grammar for the pure-untyped lambda calculus, expressed using our framework (alph definition partially elided for brevity):
+It's almost as if by magic, but the addition of the disjunctive combinator to the sequential actually turns our framework into something really special, capable of chewing through any LL(*) grammar.  Just in case you don't believe me, consider the grammar for the pure-untyped lambda calculus, expressed using our framework (alph definition partially elided for brevity):
 
 object LambdaCalc extends RegexpParsers {
  
@@ -245,7 +245,7 @@ object RegexpParsers {
     | "" ^^^ None
   )
 }
-Readers who have managed to stay awake to this point may notice that I’m actually cheating a bit in these definitions.  Specifically, I’m using the ^^ and ^^^ combinators.  These are the semantic action combinators which I promised to avoid discussing.  However, for the sake of completeness, I’ll include the sources and leave you to figure out the rest:
+Readers who have managed to stay awake to this point may notice that I'm actually cheating a bit in these definitions.  Specifically, I'm using the ^^ and ^^^ combinators.  These are the semantic action combinators which I promised to avoid discussing.  However, for the sake of completeness, I'll include the sources and leave you to figure out the rest:
 
 trait Parser[+A] extends (Stream[Character]=>Result[A]) { outer =>
   ...
@@ -264,7 +264,7 @@ trait Parser[+A] extends (Stream[Character]=>Result[A]) { outer =>
     }
   }
 }
-In short, these combinators are only interesting to people who want their parsers to give them a value upon completion (usually an AST).  In short, just about any useful application of parser combinators will require these combinators, but since we’re not planning to use our framework for anything useful, there is really no need.
+In short, these combinators are only interesting to people who want their parsers to give them a value upon completion (usually an AST).  In short, just about any useful application of parser combinators will require these combinators, but since we're not planning to use our framework for anything useful, there is really no need.
 
 One really interesting parser from our first example which is worthy of attention is the member rule.  If you recall, this was defined as follows:
 
@@ -287,7 +287,7 @@ class DisParser[+A](left: Parser[A], right: Parser[A]) extends Parser[A] {
     case _: Failure => right(s)
   }
 }
-Notice what happens if left fails: it invokes the right parser passing the same Stream instance (s).  Recall that Stream is immutable, meaning that there is nothing left can do which could possibly change the value of s.  Each parser is merely grabbing characters from the head of the stream and then producing a new Stream which represents the remainder.  Parsers farther up the line (like our disjunctive parser) are still holding a reference to the stream prior to these “removals”.  This means that we don’t need to make any special effort to implement backtracking, it just falls out as a natural consequence of our use of the Stream data structure.  Isn’t that nifty?
+Notice what happens if left fails: it invokes the right parser passing the same Stream instance (s).  Recall that Stream is immutable, meaning that there is nothing left can do which could possibly change the value of s.  Each parser is merely grabbing characters from the head of the stream and then producing a new Stream which represents the remainder.  Parsers farther up the line (like our disjunctive parser) are still holding a reference to the stream prior to these “removals”.  This means that we don't need to make any special effort to implement backtracking, it just falls out as a natural consequence of our use of the Stream data structure.  Isn't that nifty?
 
 =Conclusion=
 Parser combinators are a clever bit of functional programming.  
