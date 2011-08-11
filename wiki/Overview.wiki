@@ -1,4 +1,4 @@
-#summary A quick overview of Linwah's raison d'être, features, and usage.
+#summary A quick overview of Linwah's , features, and usage.
 
 = Why Lingwah? =
 
