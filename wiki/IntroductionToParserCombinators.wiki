@@ -1,8 +1,8 @@
 #summary Introduction To Parser Combinators 
 
-Like many software developers, you have occasionally need to parse data or information out of files.
-Perhaps you have written a parser yourself or used an off-the-shelf tool like [http://www.antlr.org/ ANTLR].
-In any case, it is likely that you found the process of creating a parser to be tedious, frustrating, and error-prone.  
+Many software developers occasionally need to parse data or information out of files.
+Perhaps you have written a parser yourself or have used an off-the-shelf tool like [http://www.antlr.org/ ANTLR].
+It is likely that you found the process of creating a parser to be tedious, frustrating, and error-prone.  
 Parser combinators make it almost too easy to create a parser for a complex language without ever leaving the comfortable play-pen afforded by your Java IDE.  
 Incidentally, if you aren't familiar with the fundamentals of text parsing, context-free grammars and/or parser generators, then you might want to [http://en.wikipedia.org/wiki/Context-free_grammar do] [http://en.wikipedia.org/wiki/LL_parsing some] [http://en.wikipedia.org/wiki/Recursive_descent reading] before you continue.
 
@@ -26,41 +26,41 @@ For example, here is a very simple grammar for a simplified [http://www.scala-la
  * A simple grammar similar to Scala
  */
 public class SimpleScalaGrammar extends Grammar {
-	public final Parser ID = regex("[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*");
-	public final Parser NUM = regex("[1-9][0-9]*");
-		 
-	public final Parser expr = def();
-	
-	public final Parser formals = rep(seq(ID, str(":"), ID)).separatedBy(",");
-	public final Parser actuals = opt(rep(expr));
-	
-	public final Parser member = choice(
-		      seq(str("val"), ID, str(":"), ID, str("="), expr),
-		      seq(str("var"), ID, str(":"), ID, str("="), expr),
-		      seq(str("def"), ID, str("("), formals, str(")"), str(":"), ID, str("="), expr),
-		      seq(str("def"), ID, str(":"), ID, str("="), expr),
-		      seq(str("type"), ID, str("="), ID));
-	
-	public final Parser term = choice(
-			seq(str("("), expr, str(")")),
-			ID,
-			NUM);
-	
-	public final Parser factor = seq(term, opt(rep(seq(str("."), ID, str("("), actuals, str(")")))));
-	
-	public final Parser classExt = seq(str("extends"), ID, str("("), actuals, str(")"));
-	public final Parser classPrefix = seq(string("class"), ID, str("("), formals, str(")"));
-	public final Parser clazz = seq(classPrefix, opt(classExt), str("{"), opt(rep(member)), str("}"));
-	
-	public final Parser program = rep(clazz);
-		 
-	{
-		expr.complete(seq(factor, opt(rep(choice(seq(str("+"), factor), seq(str("-"), factor))))));
-	}
-	
-	public SimpleScalaGrammar() {
-		init();
-	}
+  public final Parser ID = regex("[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*");
+  public final Parser NUM = regex("[1-9][0-9]*");
+     
+  public final Parser expr = def();
+  
+  public final Parser formals = rep(seq(ID, str(":"), ID)).separatedBy(",");
+  public final Parser actuals = opt(rep(expr));
+  
+  public final Parser member = choice(
+          seq(str("val"), ID, str(":"), ID, str("="), expr),
+          seq(str("var"), ID, str(":"), ID, str("="), expr),
+          seq(str("def"), ID, str("("), formals, str(")"), str(":"), ID, str("="), expr),
+          seq(str("def"), ID, str(":"), ID, str("="), expr),
+          seq(str("type"), ID, str("="), ID));
+  
+  public final Parser term = choice(
+      seq(str("("), expr, str(")")),
+      ID,
+      NUM);
+  
+  public final Parser factor = seq(term, opt(rep(seq(str("."), ID, str("("), actuals, str(")")))));
+  
+  public final Parser classExt = seq(str("extends"), ID, str("("), actuals, str(")"));
+  public final Parser classPrefix = seq(string("class"), ID, str("("), formals, str(")"));
+  public final Parser clazz = seq(classPrefix, opt(classExt), str("{"), opt(rep(member)), str("}"));
+  
+  public final Parser program = rep(clazz);
+     
+  {
+    expr.complete(seq(factor, opt(rep(choice(seq(str("+"), factor), seq(str("-"), factor))))));
+  }
+  
+  public SimpleScalaGrammar() {
+    init();
+  }
 }
 
 }}}
@@ -77,9 +77,9 @@ assert results.success();
 
 =How the Magic Works=
 The really significant thing to notice here is that the SimpleScalaGrammar class does not actually do anything - it is merely a description of a grammar using basic constructs.
-In this case the develop is not required to implement anything, the developer merely describes something (the grammar to be parsed).
-Each parser defined by SimpleScalaGrammar class describes some element of the associated grammar.
-To parse some input a MatchContext (the context manages the parsing process) is created and a parser and some input is passed to it.
+The developer is not required to implement anything to create a parser with lingwah, the developer merely describes the grammar to be parsed.
+Each parser declared by SimpleScalaGrammar class describes some element of the associated grammar.
+To parse some input a ParseContext (the context manages the parsing process) is created and a parser and some input is passed to it.
 In the above example we are parsing a complete document so we use the grammar.program parser.
 If we wanted to just parse an expression then we would use the grammar.expr parser.   
 
@@ -182,11 +182,11 @@ This grammar simply says “match either the '1' character, or the '2' character”.
 
 In boolean logic, a disjunction is defined according to the following truth table:
 
-P	Q	P V Q
-T	T	T
-T	F	T
-F	T	T
-F	F	F
+P Q P V Q
+T T T
+T F T
+F T T
+F F F
 In other words, the disjunction is true if one or both of its component predicates are true.  This is exactly the sort of combinator we need to bring our framework to full LL(*) potential.  We need to define a parser combinator which takes two parsers as parameters, trying each of them in order.  If the first parser succeeds, we yield its value; otherwise, we try the second parser and return its Result (whether Success or Failure).  Thus, our disjunctive combinator should yield a parser which succeeds if and only if one of its component parsers succeeds.  This is very easily accomplished:
 
 class DisParser[+A](left: Parser[A], right: Parser[A]) extends Parser[A] {
