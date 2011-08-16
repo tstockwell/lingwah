@@ -1,4 +1,5 @@
 #summary Why Lingwah?
+#labels Featured
 
 = Why Lingwah? =
 
@@ -32,5 +33,3 @@ Lingwah also provides the advantages of parser combinators over of 'old-school' 
   * No special, non-java grammar syntax in separate project files (i.e. an external DSL)  
   * No special build steps required
   * No 'untouchable', generated java source files in your project which need to be kept in sync with the grammar specification.
-
-
