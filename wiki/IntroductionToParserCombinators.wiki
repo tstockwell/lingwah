@@ -1,4 +1,5 @@
-#summary Introduction To Parser Combinators 
+#summary Introduction To Parser Combinators
+#labels Featured
 
 Many software developers occasionally need to parse data or information out of files.
 Perhaps you have written a parser yourself or have used an off-the-shelf tool like [http://www.antlr.org/ ANTLR].
@@ -86,6 +87,4 @@ Each parser declared by SimplePascalGrammar class describes some element of the 
 To parse some input a ParseContext (the context manages the parsing process) is created and a parser and some input is passed to it.
 In the above example we are parsing a complete document so we use the grammar.program parser.
 If we wanted to just parse an expression then we would use the grammar.expr parser.   
-
-
 
