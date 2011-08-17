@@ -9,12 +9,35 @@ Our calculator should be able to:
  * support calculation of decimal numbers.
  * support Operators such as '+', '-', '*', '/'.
  * group expressions with '(' and ')'.
- * allow java style single-line comment started by a "//" and block comment enclosed by "/*" and "*/".
- * allow the use of whitespace.  So "1+2" is equivalent to "1 + 2" and "3a" is equivalent to "3 a".
- * allow the multiplication operator ('*') to be omitted. For example: "3a" is equivalent to "3*a".
+ * allow java style inline comment enclosed by "/*" and "*/".
+ * allow the use of whitespace.  So "1+2" is equivalent to "1 + 2".
  
-In this tutorial we will develop a class named 'Calculator'  
+In this tutorial we will develop a class named 'Calculator' with a single static method that parses an expression and returns the decimal value of the expression.
+Here is an example of how our calculator will work:
+{{{
+// prints "answer=2082.5615313302951609592032881793"
+System.out.println("answer="+Calculator.parse("(6543.56 - 1)/ 3.14159265/*Pi*/");
+}}}
   
+
+= The Calculator Grammar =
+  
+To understand how to specify a grammar using parser combinators it helps to have a passing knowledge of [http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form Extended Backus-Naur Form (EBNF)], a way of specifying how a language will look. 
+Our calculator language is described by the following EBNF:
+
+{{{
+inline_comment = "/*", {?any_character?}, "/*"; 
+ws	= ' ' | '\t' | '\n' | '\r' | inline_comment;
+digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9';
+number = digit, { digit };
+decimal = [ '-' ], ws, (number, ['.', [number]] | '.', number);
+addition = expr, [ws], '+', [ws], expr;
+subtraction = expr, [ws], '-', [ws], expr;
+multiplication = (expr, [ws], '*', [ws], expr) | (expr, [ws], expr);
+division = expr, [ws], '\', [ws], expr;
+group = '(', [ws], expr, [ws], ')';
+expr = decimal | addition | subtraction | multiplication | division | group;
+}}}    
 
 A typical parsing process takes 2 steps:
 
