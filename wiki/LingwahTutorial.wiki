@@ -22,7 +22,8 @@ System.out.println("answer="+Calculator.parse("(6543.56 - 1)/ 3.14159265/*Pi*/")
 = The Lingwah Way = 
 
 Lingwah is used in two steps:
- # Parse some text and create an AST (Abstract Syntax Tree). <br/> An AST is an object that represents the structure of the parsed text.
+ # Parse some text and create an AST (Abstract Syntax Tree). 
+An AST is an object that represents the structure of the parsed text.
  # Navigate and process the AST to create a result from the parsed text.
  
 == Lingwah Grammars ==   
