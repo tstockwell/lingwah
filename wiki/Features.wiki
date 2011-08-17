@@ -8,5 +8,5 @@
   * Rich set of pre-defined reusable parsers.
   * Parsing API that creates AST (Abstract Syntax Tree).  
   * AST Navigation API for selecting nodes from an AST. 
-  * AST Visitor API for processing parsed results. 
+  * Convenient AST Visitor API for processing parsed results. 
   * Comes with sample grammar definitions (currently only [http://www.w3.org/TeamSubmission/turtle/ Turtle])

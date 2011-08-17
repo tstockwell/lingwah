@@ -22,6 +22,80 @@ What's more, we can do this in a very declarative fashion.
 Thanks to the magic of DSLs, our sources will actually look like a plain-Jane context-free grammar for our language.  
 This means that we get most of the benefits of a hand-written parser without losing the maintainability afforded by parser generators like bison.
 
+In this tutorial we will use a classic example, a calculator, to show how lingwah's declarative API can be used to construct a parser.
+
+Our calculator should be able to:
+
+ * support calculation of decimal numbers.
+ * support Operators such as '+', '-', '*', '/'.
+ * group expressions with '(' and ')'.
+ * allow java style inline comment enclosed by "/*" and "*/".
+ * allow the use of whitespace.  So "1+2" is equivalent to "1 + 2".
+ 
+In this tutorial we will develop a class named 'Calculator' with a single static method that parses an expression and returns the decimal value of the expression.
+Here is an example of how our calculator will work:
+{{{
+// prints "answer=2082.5615313302951609592032881793"
+System.out.println("answer="+Calculator.parse("(6543.56 - 1)/ 3.14159265/*Pi*/");
+}}}
+  
+
+= The Calculator Grammar =
+  
+To understand how to specify a grammar using parser combinators it helps to have a passing knowledge of [http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form Extended Backus-Naur Form (EBNF)], a way of specifying how a language will look. 
+Our calculator language is described by the following EBNF:
+
+{{{
+inline_comment = "/*", {?any_character?}, "/*"; 
+blank	= ' ' | '\t' | '\n' | '\r';
+ws	= (blank, {blank}) | inline_comment;
+digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9';
+number = digit, { digit };
+decimal = [ '-' ], (number, ['.', [number]] | '.', number);
+addition = expr, [ws], '+', [ws], expr;
+subtraction = expr, [ws], '-', [ws], expr;
+multiplication = (expr, [ws], '*', [ws], expr) | (expr, [ws], expr);
+division = expr, [ws], '\', [ws], expr;
+group = '(', [ws], expr, [ws], ')';
+expr = decimal | addition | subtraction | multiplication | division | group;
+}}}
+
+
+
+EBNF code expresses the grammar of a computer language. 
+EBNF consists production rules which determine how symbols can be combined into a legal sequence.
+An EBNF production rules can be divided into type types: terminals and non-terminals.  
+Examples of terminal symbols include alphanumeric characters, punctuation marks, and white space characters.
+Non-terminal rules are combinations of terminal rules. 
+EBNF allows the the following kinds of non-terminal rules:
+ || Rule || Notation || 
+ || concatenation || , || 
+ || termination || ; || 
+ || alternation	 || |  || 
+ || option || [ ... ] || 
+ || repetition (zero or more) || { ... } || 
+ || grouping || ( ... ) || 
+ || special sequence || ? ... ? ||
+ 
+So for instance, this rule..
+{{{ ws	= ' ' | '\t' | '\n' | '\r' | inline_comment; }}}
+...defines a production rule named 'ws'.  
+This rule will match any text that: 
+ * consists of a single ' ' character.   
+ * consists of a single '\t' character.   
+ * consists of a single '\n' character.   
+ * consists of a single '\r' character.   
+ * matches the inline_comment rule.
+ 
+This rule...
+{{{ number = digit, { digit }; }}}
+...defines a production rule named 'number' that will match any text that consists of one or more instances of text that matches the 'digit' rule.
+    
+
+
+
+
+
 For example, here is a very simple grammar for a Pascal-like programming language that allows only assignments, defined in [http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form Extended Backus–Naur Form]:
 {{{
 (* a simple program syntax in EBNF − Wikipedia *)
@@ -81,7 +155,8 @@ ParseResults results= new ParseContext().parse(grammar.program, input);
 assert results.success();
 }}}
 
-The important thing to note in the previous example is that the developer is not required to implement anything to create a parser with lingwah, the developer merely describes the grammar to be parsed.
+The important thing to note in the previous example is that the developer is not required to implement anything to create a parser with lingwah.
+Instead, the developer merely describes the grammar to be parsed by creating a class that describes the grammar.
 The SimplePascalGrammar class does not actually do anything - it is merely a description of a grammar using basic constructs.
 Each parser declared by SimplePascalGrammar class describes some element of the associated grammar.
 To parse some input a ParseContext (the context manages the parsing process) is created and a parser and some input is passed to it.
