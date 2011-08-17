@@ -9,7 +9,7 @@ Our calculator should be able to:
  * support calculation of decimal numbers.
  * support Operators such as '+', '-', '{{{*}}}', '/'.
  * group expressions with '(' and ')'.
- * allow java style inline comment enclosed by "/*" and "*/".
+ * allow java style inline comment enclosed by "/{{{*}}}" and "{{{*}}}/".
  * allow the use of whitespace.  So "1+2" is equivalent to "1 + 2".
  
 In this tutorial we will develop a class named 'Calculator' with a single static method that parses an expression and returns the decimal value of the expression.
