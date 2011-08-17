@@ -7,7 +7,7 @@ In this tutorial we will use a classic example, a calculator, to show how lingwa
 Our calculator should be able to:
 
  * support calculation of decimal numbers.
- * support Operators such as '+', '-', '*', '/'.
+ * support Operators such as '+', '-', '{{{*}}}', '/'.
  * group expressions with '(' and ')'.
  * allow java style inline comment enclosed by "/*" and "*/".
  * allow the use of whitespace.  So "1+2" is equivalent to "1 + 2".
@@ -384,4 +384,3 @@ We could defer this calculation and create intermediary abstract syntax tree for
 This short tutorial cannot cover every detail of the lingwah API. There are many other useful utility methods provided to help the process of constructing a complex parser.
 
 Please refer to the lingwah API Documentation for further information.
-
