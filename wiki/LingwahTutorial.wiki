@@ -109,7 +109,7 @@ Note the following features of this class:
  * For convenience, rules can be defined with short names like 'seq' instead of 'sequence'.
  	However, if you prefer you may use the longer names.
  	The following short names are the most commonly used:
- 	<table>
+ 	<table border="1">
  	<thead><td>*long name*</td><td>*short name*</td></thead>
  	<tr><td>sequence</td><td>seq</td></tr>
  	<tr><td>choice</td><td>choice</td></tr>
