@@ -109,12 +109,14 @@ Note the following features of this class:
  * For convenience, rules can be defined with short names like 'seq' instead of 'sequence'.
  	However, if you prefer you may use the longer names.
  	The following short names are the most commonly used:
- 	|| long name || short name ||
- 	|| sequence || seq ||
- 	|| choice || choice ||
- 	|| repetition || rep, or zeroOrMore ||
- 	|| optional || opt ||
- 	|| reference || reference ||
+ 	<table>
+ 	<thead>td>long name</td><td>short name</td></thead>
+ 	<tr>td>sequence</td><td>seq</td></tr>
+ 	<tr>td>choice</td><td>choice</td></tr>
+ 	<tr>td>repetition</td><td>rep, or zeroOrMore</td></tr>
+ 	<tr>td>optional</td><td>opt</td></tr>
+ 	<tr>td>reference</td><td>reference</td></tr>
+ 	</table>
  * When supporting whitespace, instead of polluting a rule definition with a lot whitespace rules we can often just use the 'separatedBy' method to add support for whitespace to a rule.
  	For instance, these two definitions are equivalent:
 	{{{ 
