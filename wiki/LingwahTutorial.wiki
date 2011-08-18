@@ -110,7 +110,7 @@ Note the following features of this class:
  	However, if you prefer you may use the longer names.
  	The following short names are the most commonly used:
  	<table>
- 	<thead><td>long name</td><td>short name</td></thead>
+ 	<thead><td>*long name*</td><td>*short name*</td></thead>
  	<tr><td>sequence</td><td>seq</td></tr>
  	<tr><td>choice</td><td>choice</td></tr>
  	<tr><td>repetition</td><td>rep, or zeroOrMore</td></tr>
