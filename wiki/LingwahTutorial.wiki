@@ -81,18 +81,19 @@ public class CalculatorGrammar extends Grammar {
 	public final Parser number = oneOrMore(digit);
 	public final Parser decimal = seq(opt(str('-')), seq(number, opt(seq(str('.'), number))));
 	public final ParserReference expr = ref();
-	public final Parser addition = seq(expr, str('+'), expr).separatedBy(opt(ws));
-	public final Parser subtraction = seq(expr, str('-'), expr).separatedBy(opt(ws));
-	public final Parser multiplication = seq(expr, str('*'), expr).separatedBy(opt(ws));
-	public final Parser division = seq(expr, str('\\'), expr).separatedBy(opt(ws));
-	public final Parser group = seq(str('('), expr, str(')')).separatedBy(opt(ws));
+	public final Parser addition = seq(expr, str('+'), expr).sep(opt(ws));
+	public final Parser subtraction = seq(expr, str('-'), expr).sep(opt(ws));
+	public final Parser multiplication = seq(expr, str('*'), expr).sep(opt(ws));
+	public final Parser division = seq(expr, str('\\'), expr).sep(opt(ws));
+	public final Parser group = seq(str('('), expr, str(')')).sep(opt(ws));
 	{
 		expr.set(cho(decimal, addition, subtraction, multiplication, division, group));
 	}
 	
-	public CalculatorGrammar() {
+	private CalculatorGrammar() {
 		init();
 	}
+	public static final CalculatorGrammar INSTANCE= new CalculatorGrammar(); 
 }
 }}}
 
@@ -116,6 +117,7 @@ Note the following features of this class:
  	<tr><td>repetition</td><td>rep, or zeroOrMore</td></tr>
  	<tr><td>optional</td><td>opt</td></tr>
  	<tr><td>reference</td><td>reference</td></tr>
+ 	<tr><td>separatedBy</td><td>sep</td></tr>
  	</table>
  * When supporting whitespace, instead of polluting a rule definition with a lot whitespace rules we can often just use the 'separatedBy' method to add support for whitespace to a rule.
  	For instance, these two definitions are equivalent:
@@ -128,261 +130,35 @@ Note the following features of this class:
  	{{{ digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'; }}}
  	...can be written in lingwah like this...
  	{{{ Parser digit = regex("[0-9]"); }}}
- 	     
- * 
-Note that the EBNF grammar was almost directly translated into equa
+
+= Processing an AST in Lingwah =
+
+=
 
 
-A typical parsing process takes 2 steps:
+= Finally, create the Calulator = 
 
- * Scan the input, create a list of tokens. These tokens include keywords, literals, identifiers,operators etc.
-   The program that recognizes a single token is called "tokenizer".
- * Parse the tokens based on the grammar of the language.
- 
-Tokenizer
+Now that we have defined our Grammar and created a corresponding MatchProcessor it is a simple matter to create our Calculator class:
 
-First, let's create our tokenizer. The tokenizer should be able to recognize decimal number, parenthesis and the operators. Input character sequence will be recognized and translated to token.
-
-Number literal
-
-The prebuilt Terminals.DecimalLiteral can be used to tokenize decimal literals.
-
-Operators
-
-An instance of Terminals can be created to manage our operators:
-
-private static final Terminals OPERATORS = Terminals.operators("+","-","*","/", "(", ")");
-Whitespaces
-
-This calculator allows any number of white spaces before and after any number or operator.
-
-single-line comment and block comment are also allowed and treated as white space.
-
-static final Parser<Void> IGNORED =
-   Parsers.or(Scanners.JAVA_LINE_COMMENT, Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
-Put them together
-
-With the number literal tokenizer and the OPERATORS constant, our tokenizer will be:
-
-static final Parser<?> TOKENIZER = OPERATORS.tokenizer().or(Terminals.DecimalLiteral.TOKENIZER);
-And given any syntactical parser, we will be able to chain it with the tokenizer and ignore the whitespaces and comments:
-
-Parser<T> grammar = ...;
-Parser<T> parser = grammar.from(TOKENIZER, IGNORED);
-Parser and Interpreter
-
-With the tokenizer taking care of lexical analysis, we can now focus on grammar rules.
-
-Decimal Number
-
-From the tokenizer, we could have two different kinds of tokens: decimal numbers and operators. To convert the decimal number token to a Double object, we use the corresponding syntactic parser for decimal literal and transform the string result:
-
-static final Parser<Double> NUMBER = Terminals.DecimalLiteral.PARSER.map(new Map<String, Double>() {
-      public Double map(String s){
-        return Double.valueOf(s);
-      }
-    });
-Modeling Operators
-
-Before proceeding to parsing the operators, let's first model them using enum. The binary operators (+, -, *, /) implement Binary to facilitate calculation; and negative operator (-) implement Unary. We will later on declare them in a OperatorTable.
-
-enum BinaryOperator implements Binary<Double> {
-  PLUS {
-    public Double map(Double a, Double b) {
-      return a + b;
-    }
-  },
-  MINUS {
-    public Double map(Double a, Double b) {
-      return a - b;
-    }
-  },
-  MUL {
-    public Double map(Double a, Double b) {
-      return a * b;
-    }
-  },
-  DIV {
-    public Double map(Double a, Double b) {
-      return a / b;
-    }
-  }
-}
-
-enum UnaryOperator implements Unary<Double> {
-  NEG {
-    public Double map(Double n) {
-      return -n;
-    }
-  }
-}
-Parsing Operators
-
-All the operators are managed by the OPERATORS constant. The Terminals.token() method returns a parser that recognizes operator. A convenience method can be created on top of it to save a few keystrokes for us:
-
-static Parser<?> term(String... names) {
-  return OPERATORS.token(names);
-}
-For each operator, the parser will first recognize the token using the term() method and then return the corresponding BinaryOperator/UnaryOperator instance, as in:
-
-static <T> Parser<T> op(String name, T value) {
-  return term(name).retn(value);
-}
-Whitespace Operator
-
-At the beginning, we said we want to allow whitespace to be an alternative syntax for multiplication. Well, formally speaking, whitespace itself is not enough to make an operator. For example, "2 -3" should still be parsed as a "minus", not a multiplication between "2" and "-3". Therefore, our whitespace operator should only happen when none of "+", "-", "*", "/" is present.
-
-Therefore we have:
-
-static final Parser<BinaryOperator> WHITESPACE_MUL = term("+","-","*","/").not().retn(BinaryOperator.MUL);
-Operator Precedence
-
-In a classic recursive-desent parser, operators with different precedence are handled by defining different production rules, for example:
-
-term_expr ::= ...
-muldiv_expr ::= muldiv_expr ('*'|'/') term_expr
-expr = expr ('+'|'-') muldiv_expr
-This solution can lead to messy production rules when the number of operators and precedence levels scale up.
-
-It is more desirable to be able to specify the operator precedence declaratively.
-
-Left Recursion
-
-Another drawback of recursive-desent parser is left recursion.
-
-In order to preserve the left-associative nature of the operators, the above production rules, are defined left-resursively (the first rule at the right hand side of muldiv_expr is muldiv_expr itself).
-
-Such left-recursive definition will lead to infinite-recursion in a naive recursive-desent parser implementation.
-
-OperatorTable
-
-Jparsec provides support for operator precedence grammar and automatically handles left recursion incured by left-associative operators.
-
-Our target syntax should look like:
-
-Parser<Doubel> unit = ...;
-Parser<Double> parser = new OperatorTable<Double>()
-    .infixl(op("+", BinaryOperator.PLUS), 10)
-    .infixl(op("-", BinaryOperator.MINUS), 10)
-    .infixl(op("*", BinaryOperator.MUL).or(WHITESPACE_MUL), 20)
-    .infixl(op("/", BinaryOperator.DIV), 20)
-    .prefix(op("-", UnaryOperator.NEG), 30)
-    .build(unit);
-The higher the precedence number, the more tightly it binds the operands.
-
-Parens and Recursion
-
-In order to support parens, recursion needs to be involved. An expression inside a pair of parens is itself another expression, which can be nested inside another pair of parens. The way to handle recursion is to use Parser.Reference:
-
-Parser.Reference<Double> ref = Parser.newReference();
-Parser<Double> parenthesized = ref.lazy().between(term("("), term(")"));
-If you run the "parenthesized" parser above, it will fail with some error message about the reference is not set yet. And that is accurately what we are missing here. The reference needs to finally be set with the parser for expression, because, well, literally any expression can be nested within a pair of parens.
-
-So, putting it together with the operator table and whitespace operator, we have:
-
-static Parser<Double> calculator(Parser<Double> atom) {
-  Parser.Reference<Double> ref = Parser.newReference();
-  Parser<Double> unit = ref.lazy().between(term("("), term(")")).or(atom);
-  Parser<Double> parser = new OperatorTable<Double>()
-      .infixl(op("+", BinaryOperator.PLUS), 10)
-      .infixl(op("-", BinaryOperator.MINUS), 10)
-      .infixl(op("*", BinaryOperator.MUL).or(WHITESPACE_MUL), 20)
-      .infixl(op("/", BinaryOperator.DIV), 20)
-      .prefix(op("-", UnaryOperator.NEG), 30)
-      .build(unit);
-  ref.set(parser); // DO NOT FORGET THIS!
-  return parser;
-}
-And that is almost everything we need. Oh, wait, let's pass the NUMBER parser in and hook it up with the lexer to get the final parser:
-
-static final Parser<Double> CALCULATOR = calculator(NUMBER).from(TOKENIZER, IGNORED);
-And it doesn't hurt to run it and see how it happily calculates, does it?
-
-System.out.println(CALCULATOR.parse("1 + 2 (4 - 3) /*comment*/"));
-The End
-
-The final parser code is as following:
+{{{
+import java.math.BigDecimal;
+import com.googlecode.lingwah.*;
 
 public class Calculator {
-
-  enum BinaryOperator implements Binary<Double> {
-    PLUS {
-      public Double map(Double a, Double b) {
-        return a + b;
-      }
-    },
-    MINUS {
-      public Double map(Double a, Double b) {
-        return a - b;
-      }
-    },
-    MUL {
-      public Double map(Double a, Double b) {
-        return a * b;
-      }
-    },
-    DIV {
-      public Double map(Double a, Double b) {
-        return a / b;
-      }
-    }
-  }
-  
-  enum UnaryOperator implements Unary<Double> {
-    NEG {
-      public Double map(Double n) {
-        return -n;
-      }
-    }
-  }
-  
-  static final Parser<Double> NUMBER = Terminals.DecimalLiteral.PARSER.map(new Map<String, Double>() {
-      public Double map(String s) {
-        return Double.valueOf(s);
-      }
-    });
-     
-  private static final Terminals OPERATORS = Terminals.operators("+", "-", "*", "/", "(", ")");
-  
-  static final Parser<Void> IGNORED =
-      Parsers.or(Scanners.JAVA_LINE_COMMENT, Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
-      
-  static final Parser<?> TOKENIZER =
-      Parsers.or(Terminals.DecimalLiteral.TOKENIZER, OPERATORS.tokenizer());
-  
-  static Parser<?> term(String... names) {
-    return OPERATORS.token(names);
-  }
-  
-  static final Parser<BinaryOperator> WHITESPACE_MUL =
-      term("+", "-", "*", "/").not().retn(BinaryOperator.MUL);
-  
-  static <T> Parser<T> op(String name, T value) {
-    return term(name).retn(value);
-  }
-  
-  static Parser<Double> calculator(Parser<Double> atom) {
-    Parser.Reference<Double> ref = Parser.newReference();
-    Parser<Double> unit = ref.lazy().between(term("("), term(")")).or(atom);
-    Parser<Double> parser = new OperatorTable<Double>()
-        .infixl(op("+", BinaryOperator.PLUS), 10)
-        .infixl(op("-", BinaryOperator.MINUS), 10)
-        .infixl(op("*", BinaryOperator.MUL).or(WHITESPACE_MUL), 20)
-        .infixl(op("/", BinaryOperator.DIV), 20)
-        .prefix(op("-", UnaryOperator.NEG), 30)
-        .build(unit);
-    ref.set(parser);
-    return parser;
-  }
-  
-  public static final Parser<Double> CALCULATOR = calculator(NUMBER).from(TOKENIZER, IGNORED);
+	static final Parser PARSER= CalculatorGrammar.INSTANCE.expr;
+	public static BigDecimal parse(String expression) 
+	{
+		ParseResults parseResults= ParseContext.parse(PARSER, expression);
+		if (!parseResults.success())
+			throw parseResults.getError();
+		return new CalculatorProcessor().process(parseResults.getLongestMatch());
+	}
 }
-Summary
+}}} 
 
-In this tutorial, we chose to run the calculation directly in the semantic actions.
 
-We could defer this calculation and create intermediary abstract syntax tree for further analysis and processing (such as type checking and code optimisation). But that makes no real difference in the parser code. We just need to replace the direct calculation code with the code that creates the abstract syntax tree (of course, we also need to replace <Double> with <whatever your expression type>).
 
-This short tutorial cannot cover every detail of the lingwah API. There are many other useful utility methods provided to help the process of constructing a complex parser.
 
-Please refer to the lingwah API Documentation for further information.
+
+
+
