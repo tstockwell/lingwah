@@ -191,11 +191,11 @@ A !MatchProcessor is very much like a Visitor, except it has two methods:
  * the complete method, which is invoked after invoking the visit method and visiting all children nodes.
    The complete method is convenient for computing results which require children nodes to be processed before a result can be calculated.
 
-Lingwah has a default implementation of this interface named AbstractProcessor that provides a convenient implementation of the !MatchProcessor interface.
-AbstractProcessor allows for subclasses to declare process and complete methods for processing Matches found by specific Parsers.
+Lingwah has a default implementation of this interface named !AbstractProcessor that provides a convenient implementation of the !MatchProcessor interface.
+!AbstractProcessor allows for subclasses to declare process and complete methods for processing Matches found by specific Parsers.
 For instance, our !CalculatorGrammar class declares a parser named 'decimal'.
 A processor can declare a method specifically for processing Matches produced by the decimal Parser by declaring a method named 'processDecimal'.
-Whenever the AbstractProcessor.process(Match) method is invoked with a Match that was produced by the decimal Parser, AbstractProcess will forward the processing to the processDecimal method. 
+Whenever the !AbstractProcessor.process(Match) method is invoked with a Match that was produced by the decimal Parser, AbstractProcess will forward the processing to the processDecimal method. 
 
 For instance, below is shown the processor for our calculator example.
 The goal of this processor is to calculate a value from a calculator expression.
@@ -269,7 +269,7 @@ Consider the completeDecimal(Match decimal) method in the processor shown above.
 When this method is invoked the Match passed will represent an instance found by the !CalculatorGrammar.decimal Parser.
 To create a value for this Match we simply want to get the text associated with the decimal and create a !BigDecimal instance from it.
 The !BigDecimal value created from the Match text is associated with the given Match instance by calling putResult method and passing the value  
-(the AbstractProcessor class knows what Match is currently being processed so there is no need to also pass the Match).
+(the !AbstractProcessor class knows what Match is currently being processed so there is no need to also pass the Match).
 Saving the value in this way allows Matches further up the AST tree to use the value associated with the decimal element to create more results.
 
 Next consider the completeAddition(Match addition) method.
