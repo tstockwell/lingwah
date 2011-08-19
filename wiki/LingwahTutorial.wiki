@@ -195,7 +195,7 @@ Lingwah has a default implementation of this interface named !AbstractProcessor 
 !AbstractProcessor allows for subclasses to declare process and complete methods for processing Matches found by specific Parsers.
 For instance, our !CalculatorGrammar class declares a parser named 'decimal'.
 A processor can declare a method specifically for processing Matches produced by the decimal Parser by declaring a method named 'processDecimal'.
-Whenever the !AbstractProcessor.process(Match) method is invoked with a Match that was produced by the decimal Parser, AbstractProcess will forward the processing to the processDecimal method. 
+Whenever the !AbstractProcessor.process(Match) method is invoked with a Match that was produced by the decimal Parser, !AbstractProcessor will forward the processing to the processDecimal method. 
 
 For instance, below is shown the processor for our calculator example.
 The goal of this processor is to calculate a value from a calculator expression.
