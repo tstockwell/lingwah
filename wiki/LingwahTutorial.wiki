@@ -42,7 +42,7 @@ The details of how to navigate and process a lingwah Match are covered later.
 == Creating the Calculator == 	
 To create our Calculator we will be required to create three classes:
  # A subclass of the lingwah Grammar class that defines the calculator grammar.
- # A subclass of the lingwah !MatchProcessor class that processes Match instances.   
+ # A subclass of the lingwah MatchProcessor! class that processes Match instances.   
  # The Calculator class itself, which just provides a convenient API parsing text and getting a result.   
 
 = The Calculator Grammar =
@@ -359,8 +359,6 @@ Then the CalculatorProcessor.process is invoked to calculate a value from the re
 
 That's it!
 Welcome to lingwah.
-
-
 
 
 
