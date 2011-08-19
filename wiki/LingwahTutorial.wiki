@@ -134,7 +134,7 @@ Note the following features of this class:
 = Parsing text and creating an AST =
 
 Parsing text is easy.  
-A ParseContext is created and then the ParseContext.getParseResults method is invoked with a Parser.
+A !ParseContext is created and then the !ParseContext.getParseResults method is invoked with a Parser.
 Here is an example: 
 {{{
 		Document doc= new StringDocument("text to parse");
@@ -144,14 +144,14 @@ Here is an example:
 			throw parseResults.getError();
 }}}
 
-The ParseContext class manages the parsing process.
-Among other things, the ParseContext class caches Matches produces by Parsers in order to avoid parsing the same part of a Document with the same Parser more than once.
+The !ParseContext class manages the parsing process.
+Among other things, the !ParseContext class caches Matches produces by Parsers in order to avoid parsing the same part of a Document with the same Parser more than once.
 This makes linwah's parsing process efficient. 
 The Document class provides an abstract interface that provides access to text.
 
-The ParseContext and Document can work together to allow lingwah to be used in sophisticated situations where the Document is being changed.
-When a Document is changed the associated ParseContext is notified of the changes.
-The ParseContext then invalidates its' internal cache associated with the changed text and only reparses text that has changed.
+The !ParseContext and Document can work together to allow lingwah to be used in sophisticated situations where the Document is being changed.
+When a Document is changed the associated !ParseContext is notified of the changes.
+The !ParseContext then invalidates its' internal cache associated with the changed text and only reparses text that has changed.
 This makes lingwah an efficient parser to use for creating text editors.  
  	
 = Processing an AST in Lingwah =
@@ -193,7 +193,7 @@ A !MatchProcessor is very much like a Visitor, except it has two methods:
 
 Lingwah has a default implementation of this interface named AbstractProcessor that provides a convenient implementation of the !MatchProcessor interface.
 AbstractProcessor allows for subclasses to declare process and complete methods for processing Matches found by specific Parsers.
-For instance, our CalculatorGrammar class declares a parser named 'decimal'.
+For instance, our !CalculatorGrammar class declares a parser named 'decimal'.
 A processor can declare a method specifically for processing Matches produced by the decimal Parser by declaring a method named 'processDecimal'.
 Whenever the AbstractProcessor.process(Match) method is invoked with a Match that was produced by the decimal Parser, AbstractProcess will forward the processing to the processDecimal method. 
 
@@ -266,15 +266,15 @@ Consider the completeDecimal(Match decimal) method in the processor shown above.
 		putResult(new BigDecimal(decimal.getText()));
 	}
 }}}
-When this method is invoked the Match passed will represent an instance found by the CalculatorGrammar.decimal Parser.
-To create a value for this Match we simply want to get the text associated with the decimal and create a BigDecimal instance from it.
-The BigDecimal value created from the Match text is associated with the given Match instance by calling putResult method and passing the value  
+When this method is invoked the Match passed will represent an instance found by the !CalculatorGrammar.decimal Parser.
+To create a value for this Match we simply want to get the text associated with the decimal and create a !BigDecimal instance from it.
+The !BigDecimal value created from the Match text is associated with the given Match instance by calling putResult method and passing the value  
 (the AbstractProcessor class knows what Match is currently being processed so there is no need to also pass the Match).
 Saving the value in this way allows Matches further up the AST tree to use the value associated with the decimal element to create more results.
 
 Next consider the completeAddition(Match addition) method.
-When this method is invoked the Match passed will represent an instance found by the CalculatorGrammar.addition Parser.
-Recall the definition of the CalculatorGrammar.addition Parser:
+When this method is invoked the Match passed will represent an instance found by the !CalculatorGrammar.addition Parser.
+Recall the definition of the !CalculatorGrammar.addition Parser:
 {{{
 	public final Parser addition = seq(expr, str('+'), expr).separatedBy(opt(ws));
 }}}
@@ -309,7 +309,7 @@ Note that we could have also written the completeAddition this way:
 The Match class provides several convenient methods for accessing children.
 
 Now consider the completeExpr(Match expr) method.
-When this method is invoked the Match passed will represent an instance found by the CalculatorGrammar.expr Parser:
+When this method is invoked the Match passed will represent an instance found by the !CalculatorGrammar.expr Parser:
 {{{
 	{
 		expr.set(cho(decimal, addition, subtraction, multiplication, division, group));
@@ -353,11 +353,15 @@ public class Calculator {
 }}} 
 
 This class simply performs the two steps that comprise the typical linwah workflow, parsing some text and then processing the AST.
-First the ParseContext.parse method (a convenience method) is invoked to parse an expression.
+First the !ParseContext.parse method (a convenience method) is invoked to parse an expression.
 Then the CalculatorProcessor.process is invoked to calculate a value from the results.
 
 
 That's it!
 Welcome to lingwah.
+
+
+
+
 
 
