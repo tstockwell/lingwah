@@ -166,7 +166,7 @@ such as managing the navigation of nodes in the AST, caching results associated 
 
 Lingwah !MatchProcessor API is an implementation of the [http://en.wikipedia.org/wiki/Visitor_pattern Vistor pattern], and provides a convenient API for processing Match ASTs.
 
-The Match class has a method called accept(MatchProccessor) which accepts a !MatchProcessor, calls the !MatchProcessor's 
+The Match class has a method called accept(MatchProcessor) which accepts a !MatchProcessor, calls the !MatchProcessor's 
 process methods, optionally passes the process to all of its children (and so on and so on), and then finally calls the 
 !MatchProcessor's complete method. 
 
