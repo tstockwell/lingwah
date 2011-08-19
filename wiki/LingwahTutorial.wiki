@@ -135,11 +135,52 @@ Note the following features of this class:
 
 As mentioned previously, lingwah parses text and creates an AST (and an AST is represented by a Match).
 Lingwah provides a convenient API for processing ASTs, the MatchProcessor API.
-It is not necessay to use this processor API, ASTs may be navigated and processed in many ways.
-The MatchProcessor API is convenient becauses it provides functionality which is commonly needed to process an AST, such as managing the navigation of nodes in the AST.
+It is not necessary to use this processor API, ASTs may be navigated and processed in many ways.
+The MatchProcessor API is convenient becauses it provides functionality which is commonly needed when processing an AST, 
+such as managing the navigation of nodes in the AST, caching results associated with nodes, etc.
 
-   
 
+
+== The MatchProcessor API ==
+
+Lingwah MatchProcessor API is an implementation of the [http://en.wikipedia.org/wiki/Visitor_pattern Vistor pattern], and provides a convenient API for processes Match ASTs.
+
+The Match class has a method called accept(MatchProccessor) which accepts a MatchProcessor, calls the MatchProcessor's 
+process methods, optionally passes the process to all of its children (and so on and so on), and then finally calls the 
+MatchProcessor's complete method. 
+
+Here is the interface that is implemented by all MatchProcessors:
+{{{
+public interface MatchProcessor {
+	/**
+	 * Invoked when visiting a node in the tree
+	 * @return true if children of this node should be visited
+	 */
+	public boolean process(Match node);
+	
+	/**
+	 * Invoked after invoking the visit method and visiting all children nodes   
+	 */
+	public void complete(Match node);
+}
+}}}
+
+A MatchProcessor is very much like a Visitor, except it has two methods:
+ * the process method, like the visit method in the Visitor pattern, is invoked when visiting a node in the AST tree, and
+ * the complete method, which is invoked after invoking the visit method and visiting all children nodes.
+
+The complete method is convenient for computing results which require children nodes to be processed before a result can be calculated.
+
+Lingwah has a default implementation of this interface named AbstractProcessor that provides a convenient implementation of the MatchProcessor interface.
+
+
+A MatchProcessor is like a visitor, it navigates an AST tree and calls the process and complete methods for each node in the tree.
+The base processor class has a method named process(Match).
+When the process method is invoked the 
+
+
+Below is shown the processor for out calculator example.
+The rest of this section will explain how the processor works.
 {{{
 import java.math.*;
 import java.util.List;
@@ -191,6 +232,22 @@ public class CalculatorProcessor extends AbstractProcessor {
 
 }
 }}}
+
+== Method names ==
+
+A processor is like a vistor, it navigates an AST tree and calls the process and complete methods for each node in the tree.
+The base processor class has a method named process(Match).
+When the process method is invoked the 
+
+
+Let's examine the first method, completeAddition, and explain how it works  
+	public void completeAddition(Match expr) {
+		List<Match> children= expr.getChildrenByType(grammar.expr);
+		BigDecimal left= getResult(children.get(0));
+		BigDecimal right= getResult(children.get(1));
+		putResult(left.add(right));
+	}
+ 
 
 
 =
