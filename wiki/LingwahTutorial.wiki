@@ -130,7 +130,30 @@ Note the following features of this class:
  	{{{ digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'; }}}
  	...can be written in lingwah like this...
  	{{{ Parser digit = regex("[0-9]"); }}}
+ 	
+= Parsing text and creating an AST =
 
+Parsing text is easy.  
+A ParseContext is created and then the ParseContext.getParseResults method is invoked with a Parser.
+Here is an example: 
+{{{
+		Document doc= new StringDocument("text to parse");
+		ParseContext ctx= new ParseContext(doc);
+		ParseResults parseResults= ctx.getParseResults(PARSER);
+		if (!parseResults.success())
+			throw parseResults.getError();
+}}}
+
+The ParseContext class manages the parsing process.
+Among other things, the ParseContext class caches Matches produces by Parsers in order to avoid parsing the same part of a Document with the same Parser more than once.
+This makes linwah's parsing process efficient. 
+The Document class provides an abstract interface that provides access to text.
+
+The ParseContext and Document can work together to allow lingwah to be used in sophisticated situations where the Document is being changed.
+When a Document is changed the associated ParseContext is notified of the changes.
+The ParseContext then invalidates its' internal cache associated with the changed text and only reparses text that has changed.
+This makes lingwah an efficient parser to use for creating text editors.  
+ 	
 = Processing an AST in Lingwah =
 
 As mentioned previously, lingwah parses text and creates an AST (and an AST is represented by a Match).
@@ -139,11 +162,9 @@ It is not necessary to use this processor API, ASTs may be navigated and process
 The MatchProcessor API is convenient becauses it provides functionality which is commonly needed when processing an AST, 
 such as managing the navigation of nodes in the AST, caching results associated with nodes, etc.
 
-
-
 == The MatchProcessor API ==
 
-Lingwah MatchProcessor API is an implementation of the [http://en.wikipedia.org/wiki/Visitor_pattern Vistor pattern], and provides a convenient API for processes Match ASTs.
+Lingwah MatchProcessor API is an implementation of the [http://en.wikipedia.org/wiki/Visitor_pattern Vistor pattern], and provides a convenient API for processing Match ASTs.
 
 The Match class has a method called accept(MatchProccessor) which accepts a MatchProcessor, calls the MatchProcessor's 
 process methods, optionally passes the process to all of its children (and so on and so on), and then finally calls the 
@@ -168,18 +189,18 @@ public interface MatchProcessor {
 A MatchProcessor is very much like a Visitor, except it has two methods:
  * the process method, like the visit method in the Visitor pattern, is invoked when visiting a node in the AST tree, and
  * the complete method, which is invoked after invoking the visit method and visiting all children nodes.
-
-The complete method is convenient for computing results which require children nodes to be processed before a result can be calculated.
+   The complete method is convenient for computing results which require children nodes to be processed before a result can be calculated.
 
 Lingwah has a default implementation of this interface named AbstractProcessor that provides a convenient implementation of the MatchProcessor interface.
+AbstractProcessor allows for subclasses to declare process and complete methods for processing Matches found by specific Parsers.
+For instance, our CalculatorGrammar class declares a parser named 'decimal'.
+A processor can declare a method specifically for processing Matches produced by the decimal Parser by declaring a method named 'processDecimal'.
+Whenever the AbstractProcessor.process(Match) method is invoked with a Match that was produced by the decimal Parser, AbstractProcess will forward the processing to the processDecimal method. 
 
-
-A MatchProcessor is like a visitor, it navigates an AST tree and calls the process and complete methods for each node in the tree.
-The base processor class has a method named process(Match).
-When the process method is invoked the 
-
-
-Below is shown the processor for out calculator example.
+For instance, below is shown the processor for our calculator example.
+The goal of this processor is to calculate a value from a calculator expression.
+This process does that by creating a value for every element of the AST produced by the parser.
+The value associated with the root Match of the AST will be the value of the expression. 
 The rest of this section will explain how the processor works.
 {{{
 import java.math.*;
@@ -192,67 +213,128 @@ public class CalculatorProcessor extends AbstractProcessor {
 	
 	static final CalculatorGrammar grammar= CalculatorGrammar.INSTANCE;
 	
-	public void completeAddition(Match expr) {
-		List<Match> children= expr.getChildrenByType(grammar.expr);
+	public void completeAddition(Match addition) {
+		List<Match> children= addition.getChildrenByType(grammar.expr);
 		BigDecimal left= getResult(children.get(0));
 		BigDecimal right= getResult(children.get(1));
 		putResult(left.add(right));
 	}
-	public void completeSubtraction(Match expr) {
-		List<Match> children= expr.getChildrenByType(grammar.expr);
+	public void completeSubtraction(Match subtraction) {
+		List<Match> children= subtraction.getChildrenByType(grammar.expr);
 		BigDecimal left= getResult(children.get(0));
 		BigDecimal right= getResult(children.get(1));
 		putResult(left.subtract(right));
 	}
-	public void completeMultiplication(Match expr) {
-		List<Match> children= expr.getChildrenByType(grammar.expr);
+	public void completeMultiplication(Match multiplication) {
+		List<Match> children= multiplication.getChildrenByType(grammar.expr);
 		BigDecimal left= getResult(children.get(0));
 		BigDecimal right= getResult(children.get(1));
 		putResult(left.multiply(right));
 	}
-	public void completeDivision(Match expr) {
-		List<Match> children= expr.getChildrenByType(grammar.expr);
+	public void completeDivision(Match division) {
+		List<Match> children= division.getChildrenByType(grammar.expr);
 		BigDecimal left= getResult(children.get(0));
 		BigDecimal right= getResult(children.get(1));
 		putResult(left.divide(right, 28, RoundingMode.HALF_UP));
 	}
-	public void completeGroup(Match expr) {
-		putResult(getResult(expr.getChildByType(grammar.expr)));
+	public void completeGroup(Match group) {
+		putResult(getResult(group.getChildByType(grammar.expr)));
 	}
-	public void completeDecimal(Match expr) {
-		putResult(new BigDecimal(expr.getText()));
+	public void completeDecimal(Match decimal) {
+		putResult(new BigDecimal(decimal.getText()));
 	}
 	public void completeExpr(Match expr) {
-		putResult(getResult(expr.getChildren().get(0)));
+		putResult(getResult(expr.getFirstChild()));
 	}
 
 	public static BigDecimal process(ParseResults results) {
-		return new CalculatorProcessor().getResult(results.getLongestMatch());
+		CalculatorProcessor processor= new CalculatorProcessor();
+		results.getLongestMatch().accept(processor);
+		return processor.getResult(results.getLongestMatch());
 	}
 
 }
 }}}
 
-== Method names ==
+First, notice that all the methods begin with 'complete' instead of 'process'.
+This is because we want these methods to be invoked *after* their associated children have been processed instead of before thier children are processed.
+In this way an element can use the values associated with their subelements to create a new value.
 
-A processor is like a vistor, it navigates an AST tree and calls the process and complete methods for each node in the tree.
-The base processor class has a method named process(Match).
-When the process method is invoked the 
+Consider the completeDecimal(Match decimal) method in the processor shown above.
+{{{
+	public void completeDecimal(Match decimal) {
+		putResult(new BigDecimal(decimal.getText()));
+	}
+}}}
+When this method is invoked the Match passed will represent an instance found by the CalculatorGrammar.decimal Parser.
+To create a value for this Match we simply want to get the text associated with the decimal and create a BigDecimal instance from it.
+The BigDecimal value created from the Match text is associated with the given Match instance by calling putResult method and passing the value  
+(the AbstractProcessor class knows what Match is currently being processed so there is no need to also pass the Match).
+Saving the value in this way allows Matches further up the AST tree to use the value associated with the decimal element to create more results.
 
-
-Let's examine the first method, completeAddition, and explain how it works  
-	public void completeAddition(Match expr) {
-		List<Match> children= expr.getChildrenByType(grammar.expr);
+Next consider the completeAddition(Match addition) method.
+When this method is invoked the Match passed will represent an instance found by the CalculatorGrammar.addition Parser.
+Recall the definition of the CalculatorGrammar.addition Parser:
+{{{
+	public final Parser addition = seq(expr, str('+'), expr).separatedBy(opt(ws));
+}}}
+A Match produced the the addition Parser will have these children:
+ * The first child will be a Match produced by the expr Parser.
+ * The last child will be a Match produced by the expr Parser.
+ * In between the first and last children will be a Match produced by the unnamed parser produced by the call to str('+') in the addition Parser definition.
+ * There may also be children that represent white space between the '+' operator and the expressions.
+In order to produce a value for the addition element we need to get the values associated with the left and right expressions and add those values together.
+Here is the code to the completeAddition method again:
+{{{
+	public void completeAddition(Match addition) {
+		List<Match> children= addition.getChildrenByType(grammar.expr);
 		BigDecimal left= getResult(children.get(0));
 		BigDecimal right= getResult(children.get(1));
 		putResult(left.add(right));
 	}
+}}}
+The first line calls the getChildrenByType method to get all the children of the given Match produced by the grammar.expr.
+The 2nd lines gets the value associated with the left side of the addition and the 3rd line gets the value associated with the left side of the addition.
+The last lines adds the values together and saves the result for later.
+All the methods that process operators work in the same fashion.
+
+Note that we could have also written the completeAddition this way:    
+{{{
+	public void completeAddition(Match addition) {
+		BigDecimal left= getResult(addition.getFirstChild());
+		BigDecimal right= getResult(children.getLastChild());
+		putResult(left.add(right));
+	}
+}}}
+The Match class provides several convenient methods for accessing children.
+
+Now consider the completeExpr(Match expr) method.
+When this method is invoked the Match passed will represent an instance found by the CalculatorGrammar.expr Parser:
+{{{
+	{
+		expr.set(cho(decimal, addition, subtraction, multiplication, division, group));
+	}
+}}}
+The Match passed to the completeExpr method will have only one child, and that child will be a Match that represents either a decimal, addition, subtraction, multiplication, division, or group.
+So, to create a value for an expr element all the completeExpr must do is the the value associated with its child and associate that value with the given expr Match:
+{{{
+	public void completeExpr(Match expr) {
+		putResult(getResult(expr.getFirstChild()));
+	}
+}}}
+
+Finally, our calculator process includes the following convenience method:
+{{{
+	public static BigDecimal process(ParseResults results) {
+		CalculatorProcessor processor= new CalculatorProcessor();
+		Match expr= results.getLongestMatch();
+		expr.accept(processor);
+		return processor.getResult(expr);
+	}
+}}}
+This method illustrates how to process an AST.
+    
  
-
-
-=
-
-
 = Finally, create the Calulator = 
 
 Now that we have defined our Grammar and created a corresponding MatchProcessor it is a simple matter to create our Calculator class:
