@@ -42,7 +42,7 @@ The details of how to navigate and process a lingwah Match are covered later.
 == Creating the Calculator == 	
 To create our Calculator we will be required to create three classes:
  # A subclass of the lingwah Grammar class that defines the calculator grammar.
- # A subclass of the lingwah MatchProcessor class that processes Match instances.   
+ # A subclass of the lingwah !MatchProcessor class that processes Match instances.   
  # The Calculator class itself, which just provides a convenient API parsing text and getting a result.   
 
 = The Calculator Grammar =
@@ -157,20 +157,20 @@ This makes lingwah an efficient parser to use for creating text editors.
 = Processing an AST in Lingwah =
 
 As mentioned previously, lingwah parses text and creates an AST (and an AST is represented by a Match).
-Lingwah provides a convenient API for processing ASTs, the MatchProcessor API.
+Lingwah provides a convenient API for processing ASTs, the !MatchProcessor API.
 It is not necessary to use this processor API, ASTs may be navigated and processed in many ways.
-The MatchProcessor API is convenient becauses it provides functionality which is commonly needed when processing an AST, 
+The !MatchProcessor API is convenient becauses it provides functionality which is commonly needed when processing an AST, 
 such as managing the navigation of nodes in the AST, caching results associated with nodes, etc.
 
-== The MatchProcessor API ==
+== The !MatchProcessor API ==
 
-Lingwah MatchProcessor API is an implementation of the [http://en.wikipedia.org/wiki/Visitor_pattern Vistor pattern], and provides a convenient API for processing Match ASTs.
+Lingwah !MatchProcessor API is an implementation of the [http://en.wikipedia.org/wiki/Visitor_pattern Vistor pattern], and provides a convenient API for processing Match ASTs.
 
-The Match class has a method called accept(MatchProccessor) which accepts a MatchProcessor, calls the MatchProcessor's 
+The Match class has a method called accept(MatchProccessor) which accepts a !MatchProcessor, calls the !MatchProcessor's 
 process methods, optionally passes the process to all of its children (and so on and so on), and then finally calls the 
-MatchProcessor's complete method. 
+!MatchProcessor's complete method. 
 
-Here is the interface that is implemented by all MatchProcessors:
+Here is the interface that is implemented by all !MatchProcessors:
 {{{
 public interface MatchProcessor {
 	/**
@@ -186,12 +186,12 @@ public interface MatchProcessor {
 }
 }}}
 
-A MatchProcessor is very much like a Visitor, except it has two methods:
+A !MatchProcessor is very much like a Visitor, except it has two methods:
  * the process method, like the visit method in the Visitor pattern, is invoked when visiting a node in the AST tree, and
  * the complete method, which is invoked after invoking the visit method and visiting all children nodes.
    The complete method is convenient for computing results which require children nodes to be processed before a result can be calculated.
 
-Lingwah has a default implementation of this interface named AbstractProcessor that provides a convenient implementation of the MatchProcessor interface.
+Lingwah has a default implementation of this interface named AbstractProcessor that provides a convenient implementation of the !MatchProcessor interface.
 AbstractProcessor allows for subclasses to declare process and complete methods for processing Matches found by specific Parsers.
 For instance, our CalculatorGrammar class declares a parser named 'decimal'.
 A processor can declare a method specifically for processing Matches produced by the decimal Parser by declaring a method named 'processDecimal'.
@@ -337,7 +337,7 @@ This method illustrates how to process an AST.
  
 = Finally, create the Calulator = 
 
-Now that we have defined our Grammar and created a corresponding MatchProcessor it is a simple matter to create our Calculator class:
+Now that we have defined our Grammar and created a corresponding !MatchProcessor it is a simple matter to create our Calculator class:
 
 {{{
 public class Calculator {
