@@ -335,7 +335,7 @@ Finally, our calculator process includes the following convenience method:
 This method illustrates how to process an AST.
     
  
-= Finally, create the Calulator = 
+= Finally, create the Calculator = 
 
 Now that we have defined our Grammar and created a corresponding !MatchProcessor it is a simple matter to create our Calculator class:
 
@@ -359,8 +359,6 @@ Then the CalculatorProcessor.process is invoked to calculate a value from the re
 
 That's it!
 Welcome to lingwah.
-
-
 
 
 
