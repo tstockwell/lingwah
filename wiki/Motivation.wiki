@@ -29,7 +29,6 @@ Besides providing a significant advantage of convenience over other parser combi
 Lingwah also provides the advantages of parser combinators over of 'old-school' parser generators (like ANTLR):
 
   * Does not complicate the parsing process by dividing it into in lexing (token generation) and token parsing phases
-  * Built-in IDE support for grammars (ie syntax highlighting, validation, refactoring, code navigation, etc.)
   * No special, non-java grammar syntax in separate project files (i.e. an external DSL)  
   * No special build steps required
   * No 'untouchable', generated java source files in your project which need to be kept in sync with the grammar specification.
