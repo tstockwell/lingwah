@@ -87,7 +87,7 @@ public class CalculatorGrammar extends Grammar {
 	public final Parser division = seq(expr, str('/'), expr).separatedBy(opt(ws));
 	public final Parser group = seq(str('('), expr, str(')')).separatedBy(opt(ws));
 	{
-		expr.set(cho(decimal, addition, subtraction, multiplication, division, group));
+		expr.define(cho(decimal, addition, subtraction, multiplication, division, group));
 	}
 	
 	private CalculatorGrammar() {
@@ -103,7 +103,7 @@ Note the following features of this class:
  	The lingwah Grammer class includes functions for creating all types of non-terminal rules allowed in EBNF such as sequences, choices, and repetitions.
  * The expr rule is recursive.  That is, the expr rule uses rules which in turn use the expr rule.
     In order to define recursive rules a 'rule reference' is created using the ref() method.
-    Later, after all the dependent rules have been defined the reference may be set using the reference's set method.
+    Later, after all the dependent rules have been defined the reference may be set using the reference's `define` method.
  * A constructor is created at the bottom of the class definition which calls the Grammar.init() method.
  	It is important that the constructor be declared *at the bottom* of the class and that the init method is called.
  	The init method is responsible for initialing all the declared Parsers, and this can only be done *after* the parsers have been created.
@@ -312,7 +312,7 @@ Now consider the completeExpr(Match expr) method.
 When this method is invoked the Match passed will represent an instance found by the !CalculatorGrammar.expr Parser:
 {{{
 	{
-		expr.set(cho(decimal, addition, subtraction, multiplication, division, group));
+		expr.define(cho(decimal, addition, subtraction, multiplication, division, group));
 	}
 }}}
 The Match passed to the completeExpr method will have only one child, and that child will be a Match that represents either a decimal, addition, subtraction, multiplication, division, or group.
