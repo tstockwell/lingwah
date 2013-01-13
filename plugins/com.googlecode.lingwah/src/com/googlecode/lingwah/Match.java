@@ -211,7 +211,7 @@ public class Match {
 		return MatchNavigation.findChildByType(this, parser);
 	}
 
-	public List<Match> getChildrenByType(ParserReference parser) {
+	public List<Match> getChildrenByType(Parser parser) {
 		return MatchNavigation.findChildrenByType(this, parser);
 	}
 	
