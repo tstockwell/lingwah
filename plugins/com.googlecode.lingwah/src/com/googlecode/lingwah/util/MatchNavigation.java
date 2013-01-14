@@ -23,10 +23,19 @@ public class MatchNavigation
 			if (done.contains(node))
 				continue;
 			
-			if (node.getParser() == type)
+			if (node.getParser() == type) {
 				matches.add((T)node);
-			
-			todo.addAll(node.getChildren());
+				continue;
+			}
+
+			// add children in reverse order to beginning of list
+			// so that final results will be in same order as a depth
+			// first search of the root match
+			List<Match> children= node.getChildren();
+			for (int i= children.size(); 0 < i--;) {
+				Match child= children.get(i);
+				todo.add(0, child);
+			}
 		}
 
 		return matches;
