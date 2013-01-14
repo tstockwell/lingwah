@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.googlecode.lingwah.parser.ParserReference;
 import com.googlecode.lingwah.util.MatchNavigation;
 import com.googlecode.lingwah.util.MatchUtils;
 
 public class Match {
 	
 	private List<Match> children;
+	private List<Match> parents= new ArrayList<Match>();
 	
 	private ParseContext _ctx; 
 
@@ -57,6 +57,10 @@ public class Match {
 		match.start= first.getStart();
 		match.end= last.getEnd();
 		match.setChildren(children);
+		
+		for (Match child:children) {
+			child.addParent(match);
+		}
 		return match;
 	}
 	
@@ -70,6 +74,10 @@ public class Match {
 
 	public int getStart() {
 		return start;
+	}
+
+	private void addParent(Match parent) {
+		parents.add(parent);
 	}
 
 	private void setChildren(List<Match> children) {
@@ -207,6 +215,10 @@ public class Match {
 		return true;
 	}
 
+	public List<Match> getParents() {
+		return parents;
+	}
+
 	public Match getChildByType(Parser parser) {
 		return MatchNavigation.findChildByType(this, parser);
 	}
@@ -235,6 +247,14 @@ public class Match {
 				node.accept(visitor);
 		}
 		visitor.complete(this);
+	}
+
+	public Match findFirstSiblingByType(Parser type) {
+		return MatchNavigation.findFirstSiblingByType(this, type);
+	}
+
+	public Match findByType(Parser type) {
+		return MatchNavigation.findFirstDescendantByType(this, type);
 	}
 	
 	

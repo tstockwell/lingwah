@@ -93,6 +93,8 @@ abstract public class AbstractProcessor implements MatchProcessor {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getResult(Match match) {
+		if (match == null)
+			return null;
 		Object result= _results.get(match);
 		if (result == null && !_visited.contains(match)) {
 			match.accept(this);
