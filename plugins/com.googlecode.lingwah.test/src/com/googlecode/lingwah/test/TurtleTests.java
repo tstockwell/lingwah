@@ -72,14 +72,14 @@ extends TestCase
 		Match rootNode= results.getLongestMatch();
 		
 		// the AST should have 3 statements in it
-		List<Match> nodes= MatchNavigation.findAllByType(rootNode, statementMatcher);
+		List<Match> nodes= MatchNavigation.findDescendantsByType(rootNode, statementMatcher);
 		Assert.assertEquals(3, nodes.size());
 		// .. 2 directives
-		nodes= MatchNavigation.findAllByType(rootNode, turtle.DIRECTIVE);
+		nodes= MatchNavigation.findDescendantsByType(rootNode, turtle.DIRECTIVE);
 		System.out.println("------- xml --------------\n"+MatchUtils.toXML(rootNode));
 		Assert.assertEquals(2, nodes.size());
 		// .. 1 TRIPLES
-		nodes= MatchNavigation.findAllByType(rootNode, turtle.TRIPLES);
+		nodes= MatchNavigation.findDescendantsByType(rootNode, turtle.TRIPLES);
 		Assert.assertEquals(1, nodes.size());
 		
 

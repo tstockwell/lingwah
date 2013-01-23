@@ -67,6 +67,10 @@ public abstract class Parser
 		_label= label;
 		return this;
 	}
+	public Parser label(String label) {
+		_label= label;
+		return this;
+	}
 	
 	public boolean isRecursive() {
 		if (_isRecursive == null) {
@@ -105,6 +109,10 @@ public abstract class Parser
 	 */
 	public ParseResults createResults(ParseContext parseContext, int start) {
 		return new ParseResults(parseContext, this, start);
+	}
+
+	public boolean isCombinator() {
+		return false;
 	}
 	
 }

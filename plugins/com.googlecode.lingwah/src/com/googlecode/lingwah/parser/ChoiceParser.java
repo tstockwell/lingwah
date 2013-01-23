@@ -15,7 +15,7 @@ import com.googlecode.lingwah.ParseError;
 import com.googlecode.lingwah.ParseResults;
 import com.googlecode.lingwah.Parser;
 
-public class ChoiceParser extends Parser
+public class ChoiceParser extends CombinatorParser
 {
 	protected final ArrayList<Parser> parsers= new ArrayList<Parser>();
 	

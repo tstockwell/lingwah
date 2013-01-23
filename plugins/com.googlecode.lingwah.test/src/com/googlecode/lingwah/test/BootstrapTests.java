@@ -76,7 +76,7 @@ extends TestCase
 		results= ctx.getParseResults(parser, 0); 
 		assertTrue(results.getErrorMessage(), results.success());
 		assertEquals(results.longestLength(), txt.length());
-		List<Match> nodes= MatchNavigation.findAllByType(results.getLongestMatch(), four);
+		List<Match> nodes= MatchNavigation.findDescendantsByType(results.getLongestMatch(), four);
 		Assert.assertEquals(1, nodes.size());
 		
 		txt= "3";

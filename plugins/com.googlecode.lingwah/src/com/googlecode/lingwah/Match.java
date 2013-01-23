@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.googlecode.lingwah.parser.ParserReference;
 import com.googlecode.lingwah.util.MatchNavigation;
 import com.googlecode.lingwah.util.MatchUtils;
 
@@ -255,6 +256,14 @@ public class Match {
 
 	public Match findByType(Parser type) {
 		return MatchNavigation.findFirstDescendantByType(this, type);
+	}
+
+	public Match findMatchByType(Parser type) {
+		return MatchNavigation.findMatchByType(this, type);
+	}
+
+	public List<Match> findAllMatchByType(Parser type) {
+		return MatchNavigation.findAllMatchByType(this, type);
 	}
 	
 	

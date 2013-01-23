@@ -130,7 +130,7 @@ extends TestCase
 		Match rootNode= results.getMatches().get(0);
 		
 		// the AST should have 3 statements in it
-		List<Match> statements= MatchNavigation.findAllByType(rootNode, statementMatcher);
+		List<Match> statements= MatchNavigation.findDescendantsByType(rootNode, statementMatcher);
 		Assert.assertEquals(3, statements.size());
 		
 

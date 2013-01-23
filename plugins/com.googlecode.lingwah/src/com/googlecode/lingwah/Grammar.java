@@ -18,7 +18,7 @@ public class Grammar {
 
 	protected Grammar() {
 	}
-
+	
 	final protected ParserReference ref() {
 		return Parsers.ref();
 	}
