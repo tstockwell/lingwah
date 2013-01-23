@@ -11,7 +11,7 @@ import com.googlecode.lingwah.ParseResults;
 import com.googlecode.lingwah.Parser;
 import com.googlecode.lingwah.Parsers;
 
-public class SequenceParser extends Parser {
+public class SequenceParser extends CombinatorParser {
 	private final Parser[] _parsers;
 	private final Parser _tailMatcher;
 

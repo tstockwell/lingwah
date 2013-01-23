@@ -20,7 +20,7 @@ import com.googlecode.lingwah.Parsers;
  * @author Ted Stockwell
  *
  */
-public final class RepetitionParser extends Parser
+public final class RepetitionParser extends CombinatorParser
 {
 	private final Parser _matcher;
 	private final boolean _isOptional;

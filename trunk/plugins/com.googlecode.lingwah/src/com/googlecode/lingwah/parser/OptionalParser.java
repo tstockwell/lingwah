@@ -9,7 +9,7 @@ import com.googlecode.lingwah.ParseError;
 import com.googlecode.lingwah.ParseResults;
 import com.googlecode.lingwah.Parser;
 
-public class OptionalParser extends Parser {
+public class OptionalParser extends CombinatorParser {
 	
 	private Parser _matcher;
 
