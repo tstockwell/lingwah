@@ -183,9 +183,12 @@ public class MatchNavigation
 	 * where PIPE, LBRACE, and RBRACE are terminals.  
 	 * ClosureBody is a Parser that defines elements that may recursively contain a TypeParameterDeclaration.
 	 * 
-	 * If we try to find the TypeParameterDeclaration associated with a ClosureLiteral 
-	 * by searching an occurence of a TypeParameterDeclaration then we may end up finding
-	 * a TypeParameterDeclaration instance that actually occurs in the closure body.
+	 * Since the TypeParameter element in ClosureLiteral is optional, and 
+	 * since ClosureBody is a parser recursively refers to TypeParameterDeclaration,   
+	 * if we try to find the TypeParameterDeclaration associated with a ClosureLiteral 
+	 * by searching the match tree for an occurrence of a TypeParameterDeclaration 
+	 * then we may end up finding a TypeParameterDeclaration instance that actually 
+	 * occurs in the closure body.
 	 * 
 	 * This method directs its search based on the structure of the parser associated with the match to search.
 	 * The search will search the tree of matches but will only consider the 
