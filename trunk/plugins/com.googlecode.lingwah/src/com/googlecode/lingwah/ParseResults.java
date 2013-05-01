@@ -67,11 +67,11 @@ public class ParseResults {
 	
 	
 	public ParseResults setError(String msg) {
-		setError(new ParseError(_matcher, msg, _position));
+		setError(new ParseError(_ctx, _matcher, msg, _position));
 		return this;
 	}
 	public ParseResults setError(String msg, int position) {
-		setError(new ParseError(_matcher, msg, position));
+		setError(new ParseError(_ctx, _matcher, msg, position));
 		return this;
 	}
 	
