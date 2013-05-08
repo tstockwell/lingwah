@@ -43,4 +43,26 @@ public class StringDocument implements Document {
 		return _document.indexOf(target, i);
 	}
 
+	@Override
+	public int[] translateOffset(int offset) {
+		
+		int line= 0;
+		int column= 0;
+		int end= offset;
+		int pos = -1;
+		do
+		{
+			int p = indexOf('\n', pos+1);
+			if (p < 0 || end < p)
+				break;
+			pos= p;
+			line++;
+		}
+		while (true);
+		column= end - pos;
+		line++;
+		
+		return new int[] { line, column};
+	}
+
 }
