@@ -33,7 +33,8 @@ public class ParseError extends Error {
 	
 	@Override
 	public String toString() {
-		return "{parser:"+parser+"position:"+position+",message:"+errorMsg+"}";
+		int[] linecol= context.getDocument().translateOffset(position);
+		return "{parser:"+parser+", line:"+linecol[0]+", column: "+linecol[1]+", message:"+errorMsg+"}";
 	}
 
 }

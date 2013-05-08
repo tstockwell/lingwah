@@ -22,5 +22,10 @@ public interface Document {
 	public boolean startsWith(String prefix, int offset);
 
 	public int indexOf(String str, int fromIndex);
+	
+	/**
+	 * translates an offset within the document to the line/column position
+	 */
+	public int[] translateOffset(int offset);
 
 }
