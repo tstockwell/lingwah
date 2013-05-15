@@ -4,7 +4,6 @@
 package com.googlecode.lingwah.parser;
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,33 +13,33 @@ import com.googlecode.lingwah.ParseError;
 import com.googlecode.lingwah.ParseResults;
 import com.googlecode.lingwah.Parser;
 import com.googlecode.lingwah.Parsers;
+import com.googlecode.lingwah.exception.RecursiveMatchersNotSupported;
 
 /**
- * Returns a result for each repetition of the given parser. 
+ * Similar to RepetitionParser but only returns the longest possible match.
+ * May not be used with recursive parsers.
+ * 
  * @author Ted Stockwell
- *
  */
-public final class RepetitionParser extends CombinatorParser
+public final class LongestParser extends CombinatorParser
 {
 	private final Parser _matcher;
-	private final boolean _isOptional;
 
-	/**
-	 * @param isOptional true if repeat zero or more, else repeat one of more
-	 */
-	public RepetitionParser(Parser parser, boolean isOptional)
+	public LongestParser(Parser parser)
 	{
 		_matcher= parser;
-		_isOptional= isOptional;
 	}
 	
 	@Override
 	public String getDefaultLabel() {
-		return "repeat("+_matcher.getLabel()+")";
+		return "longest("+_matcher.getLabel()+")";
 	}
 
 	@Override
-	public void startMatching(final ParseContext ctx, int start, final ParseResults targetResults) {
+	public void startMatching(final ParseContext ctx, final int start, final ParseResults targetResults) {
+		if (_matcher.isRecursive())
+			throw new RecursiveMatchersNotSupported(this);
+		
 		
 		class RepetitionListener implements ParseResults.Listener {
 			private Match _previousMatch;
@@ -49,24 +48,20 @@ public final class RepetitionParser extends CombinatorParser
 			}
 			@Override
 			public void onMatchFound(ParseResults results, final Match nextNode) {
-				ArrayList<Match> children= new ArrayList<Match>();
+				Match match= nextNode;
 				if (_previousMatch != null)
-					children.addAll(_previousMatch.getChildren());
-				children.add(nextNode);
-				Match node= Match.create(ctx, targetResults.getMatcher(), children);
-				targetResults.addMatch(node);
-				ctx.doMatch(_matcher, nextNode.getEnd()).addListener(new RepetitionListener(node));
+					match= Match.create(ctx, targetResults.getMatcher(), _previousMatch.getStart(), nextNode.getEnd());
+				ctx.doMatch(_matcher, nextNode.getEnd()).addListener(new RepetitionListener(match));
 			}
-
 			@Override
 			public void onMatchError(ParseResults results, ParseError parseError) {
-				targetResults.setError(parseError);
+				if (_previousMatch != null) {
+					targetResults.addMatch(_previousMatch);
+				}
+				else
+					targetResults.setError(parseError);
 			}
 		};
-		
-		// add a match of zero length
-		if (_isOptional)
-			targetResults.addMatch(Match.create(ctx, this, start, start));
 		
 		ctx.doMatch(_matcher, start).addListener(new RepetitionListener(null));
 	}
@@ -77,16 +72,9 @@ public final class RepetitionParser extends CombinatorParser
 	}
 	
 	public Parser separatedBy(Parser separator) {
-		Parser parser= Parsers.seq(_matcher, Parsers.opt(Parsers.rep(Parsers.seq(separator, _matcher))));
-		if (_isOptional)
-			parser= Parsers.opt(parser);
-		return parser;
+		return Parsers.seq(_matcher, Parsers.opt(Parsers.rep(Parsers.seq(separator, _matcher))));
 	}
 	public final Parser sep(Parser separator) {
 		return separatedBy(separator);
-	}
-
-	public boolean isOptional() {
-		return _isOptional;
 	}
 }

@@ -1,6 +1,7 @@
 package com.googlecode.lingwah;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -73,25 +74,20 @@ public abstract class Parser
 	}
 	
 	public boolean isRecursive() {
-		if (_isRecursive == null) {
-			boolean isRecursive= false;
-			HashSet<Parser> done= new HashSet<Parser>();
-			ArrayList<Parser> todo= new ArrayList<Parser>();
-			todo.addAll(getDependencies());
-			while (!todo.isEmpty()) {
-				Parser parser= todo.remove(0);
-				if (!done.contains(parser)) {
-					done.add(parser);
-					if (parser == this) {
-						isRecursive= true;
-						break;
-					}
-					todo.addAll(parser.getDependencies());
-				}
-			}
-			_isRecursive= isRecursive;
-		}
+		if (_isRecursive == null) 
+			_isRecursive= isRecursive(new HashSet<Parser>(),this);
 		return _isRecursive;
+	}
+	boolean isRecursive(Collection<Parser> seen, Parser parser) {
+		seen= new HashSet<Parser>(seen);
+		seen.add(parser);		
+		for (Parser dependent : parser.getDependencies()) {
+			if (seen.contains(dependent))
+				return true;
+			if (isRecursive(seen, dependent))
+				return true;
+		}
+		return false;
 	}
 	
 	public Parser excluding(Parser...filters) {
