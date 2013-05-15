@@ -28,10 +28,11 @@ public class OptionalParser extends CombinatorParser {
 	}
 
 	@Override
-	public void startMatching(ParseContext ctx, int start, final ParseResults targetResults) {
+	public void startMatching(final ParseContext ctx, final int start, final ParseResults targetResults) {
 		
-		// add a match of zero length
-		targetResults.addMatch(Match.create(ctx, this, start, start));
+		// immediately add a match of zero length if the parser is recursive
+		if (_matcher.isRecursive())
+			targetResults.addMatch(Match.create(ctx, this, start, start));
 		
 		// add any other matches that are found
 		ctx.doMatch(_matcher, start).addListener(new ParseResults.Listener() {
@@ -42,7 +43,12 @@ public class OptionalParser extends CombinatorParser {
 			
 			@Override
 			public void onMatchError(ParseResults results, ParseError parseError) {
-				targetResults.setError(parseError);			}
+				if (!_matcher.isRecursive()) {
+					targetResults.addMatch(Match.create(ctx, targetResults.getMatcher(), start, start));
+				}
+				else
+					targetResults.setError(parseError);			
+			}
 		});
 	}
 }

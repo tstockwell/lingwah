@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.googlecode.lingwah.parser.ChoiceParser;
 import com.googlecode.lingwah.parser.FirstParser;
+import com.googlecode.lingwah.parser.LongestParser;
 import com.googlecode.lingwah.parser.ParserReference;
 import com.googlecode.lingwah.parser.RepetitionParser;
 import com.googlecode.lingwah.parser.SequenceParser;
@@ -98,7 +99,7 @@ public class Grammar {
 		return excluding(parser, filters);
 	}
 
-	protected RepetitionParser repeat(final Parser parser) {
+	final protected RepetitionParser repeat(final Parser parser) {
 		return Parsers.repeat(parser);
 	}
 
@@ -112,6 +113,10 @@ public class Grammar {
 
 	final protected RepetitionParser zeroOrMore(final Parser parser) {
 		return Parsers.zeroOrMore(parser);
+	}
+
+	final protected LongestParser longest(final Parser parser) {
+		return Parsers.longest(parser);
 	}
 
 	// ============================================================================================

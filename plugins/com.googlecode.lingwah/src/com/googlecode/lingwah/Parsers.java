@@ -4,8 +4,9 @@ package com.googlecode.lingwah;
 import com.googlecode.lingwah.parser.ChoiceParser;
 import com.googlecode.lingwah.parser.ExcludingParser;
 import com.googlecode.lingwah.parser.FirstParser;
-import com.googlecode.lingwah.parser.ParserReference;
+import com.googlecode.lingwah.parser.LongestParser;
 import com.googlecode.lingwah.parser.OptionalParser;
+import com.googlecode.lingwah.parser.ParserReference;
 import com.googlecode.lingwah.parser.RegularExpressionParser;
 import com.googlecode.lingwah.parser.RepetitionParser;
 import com.googlecode.lingwah.parser.SequenceParser;
@@ -114,6 +115,10 @@ public final class Parsers
 	public static final RepetitionParser zeroOrMore(final Parser parser)
 	{
 		return new RepetitionParser(parser, true);
+	}
+	public static final LongestParser longest(final Parser parser)
+	{
+		return new LongestParser(parser);
 	}
 	
 

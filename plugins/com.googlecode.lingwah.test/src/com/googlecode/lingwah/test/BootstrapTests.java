@@ -23,6 +23,8 @@ import com.googlecode.lingwah.Parser;
 import com.googlecode.lingwah.Parsers;
 import com.googlecode.lingwah.parser.ChoiceParser;
 import com.googlecode.lingwah.parser.FirstParser;
+import com.googlecode.lingwah.parser.LongestParser;
+import com.googlecode.lingwah.parser.OptionalParser;
 import com.googlecode.lingwah.parser.RepetitionParser;
 import com.googlecode.lingwah.parser.StringParser;
 import com.googlecode.lingwah.util.MatchNavigation;
@@ -172,6 +174,31 @@ extends TestCase
 		results= ctx.getParseResults(parser, 0); 
 		assertTrue(results.getErrorMessage(), results.success());
 		assertEquals(results.longestLength(), txt.length());
+		
+		// test longest
+		txt= "444";
+		ctx= new ParseContext(txt);
+		parser= new LongestParser(four); 
+		results= ctx.getParseResults(parser, 0); 
+		assertTrue(results.getErrorMessage(), results.success());
+		assertEquals(1, results.getMatches().size());
+		assertEquals(txt.length(), results.longestLength());
+		
+		txt= "444";
+		ctx= new ParseContext(txt);
+		parser= new OptionalParser(new LongestParser(four)); 
+		results= ctx.getParseResults(parser, 0); 
+		assertTrue(results.getErrorMessage(), results.success());
+		assertEquals(1, results.getMatches().size());
+		assertEquals(txt.length(), results.longestLength());
+		
+		txt= "44444";
+		ctx= new ParseContext(txt);
+		parser= Parsers.opt(Parsers.longest(Parsers.str("4"))); 
+		results= ctx.getParseResults(parser, 0); 
+		assertTrue(results.getErrorMessage(), results.success());
+		assertEquals(1, results.getMatches().size());
+		assertEquals(txt.length(), results.longestLength());
 	}
 	
 	

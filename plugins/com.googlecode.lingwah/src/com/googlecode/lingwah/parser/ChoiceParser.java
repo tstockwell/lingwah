@@ -80,7 +80,10 @@ public class ChoiceParser extends CombinatorParser
 			return;
 		}
 		
+		final ParseError[] errors= new ParseError[parsers.size()];
+		final ParseError[] firstError= new ParseError[1];
 		for (int i= 0; i < parsers.size(); i++)  {
+			final int idx= i;
 			ParseResults m= ctx.doMatch(parsers.get(i), start);
 			m.addListener(new ParseResults.Listener() {
 				@Override
@@ -90,6 +93,15 @@ public class ChoiceParser extends CombinatorParser
 
 				@Override
 				public void onMatchError(ParseResults results, ParseError parseError) {
+					if (firstError[0] == null)
+						firstError[0]= parseError;
+					errors[idx]= parseError;
+					
+					// flag an error if and only if all choices have failed
+					for (ParseError pe : errors) {
+						if (pe == null)
+							return;
+					}
 					targetResults.setError(parseError); 
 				}
 			});

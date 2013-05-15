@@ -18,6 +18,10 @@ public final class StringParser extends TerminalParser
 		_target= target;
 		_insensitive= insensitive;
 	}
+	public StringParser(String target)
+	{
+		this(target, false);
+	}
 	
 	@Override
 	public String getDefaultLabel() {
