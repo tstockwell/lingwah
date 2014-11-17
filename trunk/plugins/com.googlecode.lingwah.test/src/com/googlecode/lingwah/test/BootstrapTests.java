@@ -12,7 +12,6 @@ import static com.googlecode.lingwah.Parsers.str;
 import java.math.BigDecimal;
 import java.util.List;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import com.googlecode.lingwah.Grammar;
@@ -79,7 +78,7 @@ extends TestCase
 		assertTrue(results.getErrorMessage(), results.success());
 		assertEquals(results.longestLength(), txt.length());
 		List<Match> nodes= MatchNavigation.findDescendantsByType(results.getLongestMatch(), four);
-		Assert.assertEquals(1, nodes.size());
+		assertEquals(1, nodes.size());
 		
 		txt= "3";
 		ctx= new ParseContext(txt);
